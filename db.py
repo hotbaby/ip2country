@@ -30,13 +30,11 @@ class IPCountryMapper(Base):
 def get_country(ip):
     import socket
     import struct
-    ip_int = socket.inet_aton(ip)
-    ip_int = struct.unpack('i', ip_int)
+    ip_int = struct.unpack('!I', socket.inet_aton(ip))[0]
     mapper = session.query(IPCountryMapper)\
                                 .filter(and_(IPCountryMapper.start <= ip_int, IPCountryMapper.end >= ip_int))\
                                 .first()
     return mapper.country
-                                
 
 def create_all():
     Base.metadata.create_all()
