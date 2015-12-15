@@ -16,7 +16,10 @@ class IPCountryMapper(Base):
     
     id = Column(BigInteger, primary_key=True)
     start = Column(BigInteger, nullable=False, unique=True)
+    start_str = Column(String(16), nullable=False, unique=True)
     end = Column(BigInteger, nullable=False, unique=True)
+    end_str = Column(String(16), nullable=False, unique=True)
+    number = Column(BigInteger, nullable=False)
     registry = Column(String(32), nullable=False)
     assigned = Column(Integer, nullable=False)
     ctry = Column(String(4), nullable=False)
@@ -41,3 +44,21 @@ def create_all():
     
 def drop_all():
     Base.metadata.drop_all()
+    
+if __name__ == '__main__':
+    import struct, socket
+    def ip_aton(ip_string):
+        return struct.unpack("!I", socket.inet_aton(ip_string))[0]
+    def ip_ntoa(ip_int):
+        return socket.inet_ntoa(struct.pack("!I", ip_int))
+
+    print('start')
+    counter = 0
+    for item in session.query(IPCountryMapper).all():
+        item.number = item.end - item.start + 1
+        counter += 1
+        if counter % 1024 == 0:
+            session.commit()
+            print('commit %d' % (counter))
+    session.commit()
+    print('end')
